@@ -28,10 +28,6 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
         : ref.watch(userTicketsProvider(currentUser?.username ?? ''));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tickets'),
-        centerTitle: true,
-      ),
       body: Column(
         children: [
           // Filter tabs
@@ -120,14 +116,9 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
                       },
                       child: Card(
                         margin: const EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.grey[300]!,
-                            ),
-                          ),
+                        elevation: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -144,19 +135,20 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
+                                      horizontal: 10,
+                                      vertical: 5,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _getStatusColor(ticket.status),
-                                      borderRadius: BorderRadius.circular(4),
+                                      color: _getStatusColor(ticket.status).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       ticket.status.toUpperCase(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 10,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
+                                        color: _getStatusColor(ticket.status),
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
                                   ),
@@ -236,17 +228,17 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'open':
-        return Colors.red;
+        return const Color(0xFFDC2626); // Refined red
       case 'assigned':
-        return Colors.orange;
+        return const Color(0xFFF97316); // Orange
       case 'in_progress':
-        return Colors.blue;
+        return const Color(0xFF3B82F6); // Blue
       case 'done':
-        return Colors.green;
+        return const Color(0xFF10B981); // Emerald
       case 'cancelled':
-        return Colors.grey;
+        return const Color(0xFF6B7280); // Grey
       default:
-        return Colors.grey;
+        return const Color(0xFF6B7280);
     }
   }
 }
@@ -266,20 +258,19 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.grey[200],
+          color: isSelected ? const Color(0xFF000072) : const Color(0xFFE5E5E5),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent,
-          ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : const Color(0xFF525252),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 13,
           ),
         ),
       ),

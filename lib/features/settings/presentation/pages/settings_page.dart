@@ -12,10 +12,6 @@ class SettingsPage extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: true,
-      ),
       body: ListView(
         children: [
           // User Section
@@ -33,16 +29,15 @@ class SettingsPage extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey[300]!,
-                      ),
+                  Card(
+                    elevation: 0,
+                    margin: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -73,23 +68,24 @@ class SettingsPage extends ConsumerWidget {
                                 const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
+                                    horizontal: 10,
+                                    vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
                                     color: currentUser.role == 'admin'
-                                        ? Colors.red[100]
-                                        : Colors.blue[100],
-                                    borderRadius: BorderRadius.circular(4),
+                                        ? const Color(0xFF000072).withOpacity(0.1)
+                                        : const Color(0xFF059669).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
                                     currentUser.role.toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                       color: currentUser.role == 'admin'
-                                          ? Colors.red[700]
-                                          : Colors.blue[700],
+                                          ? const Color(0xFF000072)
+                                          : const Color(0xFF059669),
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                 ),
@@ -100,9 +96,10 @@ class SettingsPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
           const Divider(),
 

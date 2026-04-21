@@ -82,7 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: const Color(0xFF000072),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
@@ -199,27 +199,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 24),
             // Demo credentials
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                border: Border.all(color: Colors.blue),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Demo Credentials:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('User: user1 / password'),
-                  const Text('User: user2 / password'),
-                  const Text('Admin: admin / admin123'),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.all(12),
+            //   decoration: BoxDecoration(
+            //     color: Colors.blue[50],
+            //     border: Border.all(color: Colors.blue),
+            //     borderRadius: BorderRadius.circular(8),
+            //   ),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       const Text(
+            //         'Demo Credentials:',
+            //         style: TextStyle(fontWeight: FontWeight.bold),
+            //       ),
+            //       const SizedBox(height: 8),
+            //       const Text('User: user1 / password'),
+            //       const Text('User: user2 / password'),
+            //       const Text('Admin: admin / admin123'),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

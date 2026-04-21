@@ -29,7 +29,7 @@ class SplashScreen extends ConsumerWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: const Color(0xFF000072),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(

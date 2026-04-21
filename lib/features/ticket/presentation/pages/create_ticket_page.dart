@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/repositories/ticket_repository.dart';
 import '../providers/ticket_provider.dart';
+import '../providers/camera_provider.dart';
 import 'camera_screen.dart';
 
 class CreateTicketPage extends ConsumerStatefulWidget {
@@ -17,6 +20,7 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   bool _isSubmitting = false;
+  XFile? _attachedPhoto;
   final _ticketRepo = TicketRepository();
 
   @override
@@ -52,6 +56,20 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
 
     if (!mounted) return;
 
+    // Save photo to shared preferences if attached
+    if (_attachedPhoto != null) {
+      try {
+        await ref.read(savePhotoProvider(_attachedPhoto!).future);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo saved to storage')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save photo: $e')),
+        );
+      }
+    }
+
     if (ticket != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ticket ${ticket.id} created successfully')),
@@ -72,12 +90,19 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
     if (!mounted) return;
 
     if (status.isGranted) {
-      // Navigate to camera screen
-      Navigator.of(context).push(
+      // Navigate to camera screen and await result
+      final XFile? photo = await Navigator.of(context).push<XFile?>(
         MaterialPageRoute(
           builder: (_) => const CameraScreen(),
         ),
       );
+
+      if (photo != null && mounted) {
+        setState(() => _attachedPhoto = photo);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo attached successfully')),
+        );
+      }
     } else if (status.isDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Camera permission denied')),
@@ -154,11 +179,49 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Attached photo preview
+            if (_attachedPhoto != null) ...[
+              const Text('Attached Photo', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(_attachedPhoto!.path),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'File: ${_attachedPhoto!.name}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => setState(() => _attachedPhoto = null),
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Remove photo',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
             // Camera button
             ElevatedButton.icon(
               onPressed: _isSubmitting ? null : _handleCameraPermission,
               icon: const Icon(Icons.camera_alt),
-              label: const Text('Attach Photo (Camera)'),
+              label: Text(_attachedPhoto != null ? 'Change Photo' : 'Attach Photo (Camera)'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[700],
               ),

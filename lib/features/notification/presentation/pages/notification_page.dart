@@ -41,10 +41,6 @@ class NotificationPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        centerTitle: true,
-      ),
       body: notifications.isEmpty
           ? Center(
               child: Column(
@@ -65,7 +61,11 @@ class NotificationPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final notification = notifications[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: ListTile(
                     leading: Container(
                       width: 40,

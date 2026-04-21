@@ -48,8 +48,10 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-        centerTitle: true,
+        title: Text(
+          _titles[_selectedIndex],
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         elevation: 0,
       ),
       body: _pages[_selectedIndex],
