@@ -39,8 +39,13 @@ class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ticket Detail'),
+        title: const Text(
+          'Ticket Detail',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
+        backgroundColor: const Color(0xFF000072),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ticketAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

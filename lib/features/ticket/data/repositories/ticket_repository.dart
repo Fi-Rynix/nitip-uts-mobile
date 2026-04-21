@@ -2,6 +2,9 @@ import '../models/ticket_model.dart';
 import '../models/comment_model.dart';
 
 class TicketRepository {
+  // Placeholder image in base64 (grey placeholder with image icon)
+  static const String _placeholderImage = 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAALUlEQVR42mNkYPhfAQMjEwMjAyMDA6OiooICw/+GBkYGRkZGBkZGBkYGBgYGBgYA3rEHvBN3tPEAAAAASUVORK5CYII=';
+  
   // Dummy tickets
   static final List<Ticket> _tickets = [
     // User 1 tickets
@@ -12,6 +15,7 @@ class TicketRepository {
       status: 'open',
       createdBy: 'user1',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      photoPath: _placeholderImage,
       comments: [
         Comment(
           id: 'comment_001',
@@ -29,6 +33,7 @@ class TicketRepository {
       createdBy: 'user1',
       assignedTo: 'budi',
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
+      photoPath: _placeholderImage,
       comments: [
         Comment(
           id: 'comment_002',
@@ -53,6 +58,7 @@ class TicketRepository {
       createdBy: 'user2',
       assignedTo: 'siti',
       createdAt: DateTime.now().subtract(const Duration(days: 4)),
+      photoPath: _placeholderImage,
       comments: [
         Comment(
           id: 'comment_004',
@@ -70,6 +76,7 @@ class TicketRepository {
       createdBy: 'user2',
       assignedTo: 'budi',
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      photoPath: null,
       comments: [
         Comment(
           id: 'comment_005',
@@ -86,6 +93,7 @@ class TicketRepository {
       status: 'cancelled',
       createdBy: 'user2',
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
+      photoPath: _placeholderImage,
       comments: [],
     ),
   ];
@@ -175,8 +183,9 @@ class TicketRepository {
   Future<Ticket?> createTicket(
     String title,
     String description,
-    String createdBy,
-  ) async {
+    String createdBy, {
+    String? photoPath,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     try {
       final newTicket = Ticket(
@@ -186,6 +195,7 @@ class TicketRepository {
         status: 'open',
         createdBy: createdBy,
         createdAt: DateTime.now(),
+        photoPath: photoPath,
       );
       _tickets.add(newTicket);
       return newTicket;

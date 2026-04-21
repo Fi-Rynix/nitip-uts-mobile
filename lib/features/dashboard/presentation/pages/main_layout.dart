@@ -50,9 +50,14 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       appBar: AppBar(
         title: Text(
           _titles[_selectedIndex],
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
+        backgroundColor: const Color(0xFF000072),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

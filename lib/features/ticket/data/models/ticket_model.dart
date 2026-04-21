@@ -9,6 +9,7 @@ class Ticket {
   final String? assignedTo; // username of technician
   final DateTime createdAt;
   final List<Comment> comments;
+  final String? photoPath; // Path to photo file or base64 string
 
   Ticket({
     required this.id,
@@ -19,6 +20,7 @@ class Ticket {
     this.assignedTo,
     required this.createdAt,
     this.comments = const [],
+    this.photoPath,
   });
 
   // Method untuk update status
@@ -31,6 +33,7 @@ class Ticket {
     String? assignedTo,
     DateTime? createdAt,
     List<Comment>? comments,
+    String? photoPath,
   }) {
     return Ticket(
       id: id ?? this.id,
@@ -41,6 +44,7 @@ class Ticket {
       assignedTo: assignedTo ?? this.assignedTo,
       createdAt: createdAt ?? this.createdAt,
       comments: comments ?? this.comments,
+      photoPath: photoPath ?? this.photoPath,
     );
   }
 }

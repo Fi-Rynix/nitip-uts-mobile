@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/ticket_provider.dart';
-import '../../data/repositories/ticket_repository.dart';
 import '../models/ticket_filter_model.dart';
 import './ticket_detail_page.dart';
 import './create_ticket_page.dart';
@@ -20,7 +20,6 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    final ticketRepo = TicketRepository();
 
     // Determine which tickets to show based on user role
     final ticketsAsync = currentUser?.role == 'admin'
@@ -106,6 +105,8 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
                   itemCount: filteredTickets.length,
                   itemBuilder: (context, index) {
                     final ticket = filteredTickets[index];
+                    final isAdmin = currentUser?.role == 'admin';
+
                     return GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -119,84 +120,168 @@ class _TicketListPageState extends ConsumerState<TicketListPage> {
                         elevation: 0,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Ticket ID and Status
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    ticket.id,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(ticket.status).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      ticket.status.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: _getStatusColor(ticket.status),
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // Title
-                              Text(
-                                ticket.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              // Thumbnail photo
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: ticket.photoPath != null
+                                      ? DecorationImage(
+                                          image: MemoryImage(base64Decode(ticket.photoPath!)),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                                 ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                child: ticket.photoPath == null
+                                    ? Icon(
+                                        Icons.image,
+                                        color: Colors.grey[400],
+                                        size: 30,
+                                      )
+                                    : null,
                               ),
-                              const SizedBox(height: 8),
-                              // Description
-                              Text(
-                                ticket.description,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 12),
-                              // Footer: Assigned to and Created by
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'By: ${ticket.createdBy}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[500],
-                                    ),
-                                  ),
-                                  if (ticket.assignedTo != null)
-                                    Text(
-                                      'To: ${ticket.assignedTo}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.blue,
+                              const SizedBox(width: 12),
+                              // Content
+                              Expanded(
+                                child: isAdmin
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Admin view: ID and Status on same row
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              // ID on left
+                                              Text(
+                                                ticket.id,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey[500],
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              // Status badge on right
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: _getStatusColor(ticket.status).withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Text(
+                                                  ticket.status.toUpperCase(),
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: _getStatusColor(ticket.status),
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          // Title
+                                          Text(
+                                            ticket.title,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          // Description
+                                          Text(
+                                            ticket.description,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey[600],
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          // Created by and assigned info
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'By: ${ticket.createdBy}',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey[500],
+                                                ),
+                                              ),
+                                              if (ticket.assignedTo != null)
+                                                Text(
+                                                  'To: ${ticket.assignedTo}',
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // User view: Status badge (top right)
+                                          Align(
+                                            alignment: Alignment.topRight,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: _getStatusColor(ticket.status).withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                ticket.status.toUpperCase(),
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: _getStatusColor(ticket.status),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          // Title
+                                          Text(
+                                            ticket.title,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          // Description
+                                          Text(
+                                            ticket.description,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey[600],
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                ],
                               ),
                             ],
                           ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/repositories/ticket_repository.dart';
 import '../providers/ticket_provider.dart';
@@ -48,27 +49,26 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
     setState(() => _isSubmitting = true);
 
     final currentUser = ref.read(currentUserProvider);
+    
+    // Convert photo to base64 if attached
+    String? photoBase64;
+    if (_attachedPhoto != null) {
+      try {
+        final bytes = await _attachedPhoto!.readAsBytes();
+        photoBase64 = base64Encode(bytes);
+      } catch (e) {
+        print('Error converting photo to base64: $e');
+      }
+    }
+
     final ticket = await _ticketRepo.createTicket(
       _titleController.text,
       _descriptionController.text,
       currentUser?.username ?? 'unknown',
+      photoPath: photoBase64,
     );
 
     if (!mounted) return;
-
-    // Save photo to shared preferences if attached
-    if (_attachedPhoto != null) {
-      try {
-        await ref.read(savePhotoProvider(_attachedPhoto!).future);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo saved to storage')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save photo: $e')),
-        );
-      }
-    }
 
     if (ticket != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,8 +139,13 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Ticket'),
+        title: const Text(
+          'Create Ticket',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
+        backgroundColor: const Color(0xFF000072),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
