@@ -127,104 +127,113 @@ class _TicketDetailPageState extends ConsumerState<TicketDetailPage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  // Assign technician
-                  const Text('Assign Technician:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  FutureBuilder(
-                    future: _techRepo.getTechnicians(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      if (!snapshot.hasData) return const Text('No technicians available');
+                  Row(
+                    children: [
+                      // Assign technician dropdown
+                      Expanded(
+                        child: FutureBuilder(
+                          future: _techRepo.getTechnicians(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            }
+                            if (!snapshot.hasData) {
+                              return const Text('No technicians available');
+                            }
 
-                      final technicians = snapshot.data!;
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: technicians
-                              .map(
-                                (tech) => Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: ticket.assignedTo == tech.username
-                                          ? Colors.blue
-                                          : Colors.grey[300],
-                                    ),
-                                    onPressed: () {
-                                      _ticketRepo.assignTicketToTechnician(
-                                        ticket.id,
-                                        tech.username,
-                                      );
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Ticket assigned to ${tech.name}',
-                                          ),
-                                        ),
-                                      );
-                                      ref.refresh(ticketDetailProvider(widget.ticketId));
-                                    },
+                            final technicians = snapshot.data!;
+                            return DropdownButtonFormField<String>(
+                              value: ticket.assignedTo,
+                              decoration: InputDecoration(
+                                labelText: 'Assign Technician',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<String>(
+                                  value: null,
+                                  child: Text('Unassigned'),
+                                ),
+                                ...technicians.map(
+                                  (tech) => DropdownMenuItem<String>(
+                                    value: tech.username,
                                     child: Text(tech.name),
                                   ),
                                 ),
-                              )
-                              .toList(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // Change status
-                  const Text('Change Status:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatusButton(
-                          label: 'Open',
-                          isActive: ticket.status == 'open',
-                          onTap: () {
-                            _ticketRepo.updateTicketStatus(ticket.id, 'open');
-                            ref.refresh(ticketDetailProvider(widget.ticketId));
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  _ticketRepo.assignTicketToTechnician(
+                                    ticket.id,
+                                    value,
+                                  );
+                                  final techName = technicians
+                                      .firstWhere((t) => t.username == value)
+                                      .name;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Ticket assigned to $techName'),
+                                    ),
+                                  );
+                                  ref.refresh(ticketDetailProvider(widget.ticketId));
+                                }
+                              },
+                            );
                           },
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
+                      // Change status dropdown
                       Expanded(
-                        child: _StatusButton(
-                          label: 'In Progress',
-                          isActive: ticket.status == 'in_progress',
-                          onTap: () {
-                            _ticketRepo.updateTicketStatus(ticket.id, 'in_progress');
-                            ref.refresh(ticketDetailProvider(widget.ticketId));
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatusButton(
-                          label: 'Done',
-                          isActive: ticket.status == 'done',
-                          onTap: () {
-                            _ticketRepo.updateTicketStatus(ticket.id, 'done');
-                            ref.refresh(ticketDetailProvider(widget.ticketId));
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatusButton(
-                          label: 'Cancelled',
-                          isActive: ticket.status == 'cancelled',
-                          onTap: () {
-                            _ticketRepo.updateTicketStatus(ticket.id, 'cancelled');
-                            ref.refresh(ticketDetailProvider(widget.ticketId));
+                        child: DropdownButtonFormField<String>(
+                          value: ticket.status,
+                          decoration: InputDecoration(
+                            labelText: 'Change Status',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem<String>(
+                              value: 'open',
+                              child: Text('Open'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'assigned',
+                              child: Text('Assigned'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'in_progress',
+                              child: Text('In Progress'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'done',
+                              child: Text('Done'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'cancelled',
+                              child: Text('Cancelled'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              _ticketRepo.updateTicketStatus(ticket.id, value);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Ticket status changed to $value'),
+                                ),
+                              );
+                              ref.refresh(ticketDetailProvider(widget.ticketId));
+                            }
                           },
                         ),
                       ),
