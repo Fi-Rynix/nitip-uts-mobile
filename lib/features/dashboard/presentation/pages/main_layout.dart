@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import 'dashboard_page.dart';
+import '../pages/dashboard_page.dart';
 import '../../../ticket/presentation/pages/ticket_list_page.dart';
 import '../../../notification/presentation/pages/notification_page.dart';
 import '../../../settings/presentation/pages/settings_page.dart';

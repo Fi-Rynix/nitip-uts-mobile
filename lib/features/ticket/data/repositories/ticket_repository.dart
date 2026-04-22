@@ -10,8 +10,8 @@ class TicketRepository {
     // User 1 tickets
     Ticket(
       id: 'ticket_001',
-      title: "Laptop won't start",
-      description: 'My laptop suddenly won\'t turn on anymore',
+      title: "Laptoku nggak mau nyala",
+      description: 'plis ini gimana ya, aku butuh banget buat kerjaan ini',
       status: 'open',
       createdBy: 'user1',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
@@ -20,31 +20,31 @@ class TicketRepository {
         Comment(
           id: 'comment_001',
           author: 'user1',
-          content: 'Please help, I need this urgently',
+          content: 'Plis wok ini gimana jir aku butuh banget buat kerjaan ini',
           createdAt: DateTime.now().subtract(const Duration(days: 5)),
         ),
       ],
     ),
     Ticket(
       id: 'ticket_002',
-      title: 'Printer not working',
-      description: 'Network printer is not responding',
+      title: 'LOQ ku matot lagi',
+      description: 'Woilah el matot lagi, udah aku restart berkali-kali tetep aja',
       status: 'assigned',
       createdBy: 'user1',
-      assignedTo: 'budi',
+      assignedTo: 'udin',
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       photoPath: _placeholderImage,
       comments: [
         Comment(
           id: 'comment_002',
           author: 'user1',
-          content: 'Already restarted but still not working',
+          content: 'Udah aku restart berkali-kali tetep aja',
           createdAt: DateTime.now().subtract(const Duration(days: 3)),
         ),
         Comment(
           id: 'comment_003',
-          author: 'budi',
-          content: 'I\'m looking into it, will visit tomorrow',
+          author: 'udin',
+          content: 'Baik, saya akan cek segera',
           createdAt: DateTime.now().subtract(const Duration(days: 2)),
         ),
       ],
@@ -52,18 +52,18 @@ class TicketRepository {
     // User 2 tickets
     Ticket(
       id: 'ticket_003',
-      title: 'Monitor issue',
-      description: 'External monitor showing black screen',
+      title: 'Monitor mati total',
+      description: 'Monitor saya tiba-tiba mati total, sudah saya coba ganti kabel tapi tetap saja tidak menyala',
       status: 'in_progress',
       createdBy: 'user2',
-      assignedTo: 'siti',
+      assignedTo: 'viki',
       createdAt: DateTime.now().subtract(const Duration(days: 4)),
       photoPath: _placeholderImage,
       comments: [
         Comment(
           id: 'comment_004',
           author: 'user2',
-          content: 'This is affecting my work',
+          content: 'plis ini gimana ya, aku butuh banget buat kerjaan ini',
           createdAt: DateTime.now().subtract(const Duration(days: 4)),
         ),
       ],
@@ -71,17 +71,17 @@ class TicketRepository {
     Ticket(
       id: 'ticket_004',
       title: 'Network problem',
-      description: 'Internet connection keeps dropping',
+      description: 'Wifi di kantor sering putus-putus, sudah coba restart router tapi tetap saja',
       status: 'done',
       createdBy: 'user2',
-      assignedTo: 'budi',
+      assignedTo: 'udin',
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
       photoPath: null,
       comments: [
         Comment(
           id: 'comment_005',
           author: 'user2',
-          content: 'Thanks for fixing this!',
+          content: 'Makasih ya sudah dibantu, sekarang wifi lancar jaya',
           createdAt: DateTime.now().subtract(const Duration(days: 1)),
         ),
       ],
@@ -89,7 +89,7 @@ class TicketRepository {
     Ticket(
       id: 'ticket_005',
       title: 'Software installation',
-      description: 'Need Microsoft Office installed on my computer',
+      description: 'Tolong bantuin install linux di laptop saya, saya butuh buat kerjaan',
       status: 'cancelled',
       createdBy: 'user2',
       createdAt: DateTime.now().subtract(const Duration(days: 7)),

@@ -5,9 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../data/repositories/ticket_repository.dart';
 import '../providers/ticket_provider.dart';
-import '../providers/camera_provider.dart';
 import 'camera_screen.dart';
 
 class CreateTicketPage extends ConsumerStatefulWidget {
@@ -22,7 +20,7 @@ class _CreateTicketPageState extends ConsumerState<CreateTicketPage> {
   late TextEditingController _descriptionController;
   bool _isSubmitting = false;
   XFile? _attachedPhoto;
-  final _ticketRepo = TicketRepository();
+  late final _ticketRepo = ref.watch(ticketRepositoryProvider);
 
   @override
   void initState() {

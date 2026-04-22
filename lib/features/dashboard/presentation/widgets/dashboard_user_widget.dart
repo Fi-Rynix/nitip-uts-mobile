@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../ticket/presentation/providers/ticket_provider.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../providers/dashboard_provider.dart';
+import '../../data/models/dashboard_model.dart';
 
 class DashboardUserWidget extends ConsumerWidget {
   const DashboardUserWidget({Key? key}) : super(key: key);
@@ -10,8 +11,13 @@ class DashboardUserWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
-    final userTicketsAsync = ref.watch(
-      userTicketsProvider(currentUser?.username ?? ''),
+    final dashboardStatsAsync = ref.watch(
+      userDashboardStatsProvider(currentUser?.username ?? ''),
+    );
+
+    ref.listen(
+      userDashboardStatsProvider(currentUser?.username ?? ''),
+      (previous, next) {},
     );
 
     return SingleChildScrollView(
@@ -19,7 +25,7 @@ class DashboardUserWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome section - Clean text only
+          // Welcome section
           Text(
             'Welcome back,',
             style: TextStyle(
@@ -29,6 +35,7 @@ class DashboardUserWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
+
           Text(
             currentUser?.username ?? 'User',
             style: const TextStyle(
@@ -37,77 +44,62 @@ class DashboardUserWidget extends ConsumerWidget {
               letterSpacing: -0.5,
             ),
           ),
+
           const SizedBox(height: 8),
+
           Text(
-            'Here\'s your ticket overview',
+            "Here's your ticket overview",
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
             ),
           ),
+
           const SizedBox(height: 32),
 
           // Stats section
-          userTicketsAsync.when(
+          dashboardStatsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Text('Error: $error'),
-            data: (tickets) {
-              final totalTickets = tickets.length;
-              final activeTickets =
-                  tickets.where((t) => t.status != 'done' && t.status != 'cancelled').length;
-              final completedTickets = tickets.where((t) => t.status == 'done').length;
-
+            data: (DashboardStats stats) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Stats cards
                   Row(
                     children: [
                       Expanded(
                         child: _StatCard(
                           title: 'Total Tickets',
-                          value: totalTickets.toString(),
+                          value: stats.totalTickets.toString(),
                           icon: Icons.confirmation_number_outlined,
                           isAccent: true,
                         ),
                       ),
                       const SizedBox(width: 16),
+
                       Expanded(
                         child: _StatCard(
-                          title: 'Active',
-                          value: activeTickets.toString(),
+                          title: 'Active Tickets',
+                          value: stats.activeTickets.toString(),
                           icon: Icons.access_time_outlined,
                           isAccent: false,
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Completed',
-                          value: completedTickets.toString(),
-                          icon: Icons.check_circle_outline,
-                          isAccent: false,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Theme',
-                          value: ref.watch(themeModeProvider) ? 'Dark' : 'Light',
-                          icon: ref.watch(themeModeProvider)
-                              ? Icons.dark_mode_outlined
-                              : Icons.light_mode_outlined,
-                          isAccent: false,
-                          onTap: () {
-                            ref.read(themeModeProvider.notifier).state =
-                                !ref.read(themeModeProvider);
-                          },
-                        ),
-                      ),
-                    ],
+
+                  _ThemeCard(
+                    value: ref.watch(themeModeProvider)
+                        ? 'Dark'
+                        : 'Light',
+                    icon: ref.watch(themeModeProvider)
+                        ? Icons.dark_mode_outlined
+                        : Icons.light_mode_outlined,
+                    onTap: () {
+                      ref.read(themeModeProvider.notifier).toggleTheme();
+                    },
                   ),
                 ],
               );
@@ -138,6 +130,94 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    return SizedBox(
+      height: 120,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: isAccent ? const Color(0xFF000072) : null,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isAccent ? Colors.white24 : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isAccent
+                        ? Colors.white
+                        : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                    size: 20,
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center, // 🔥 center vertical
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: isAccent ? Colors.white : null,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isAccent
+                              ? Colors.white70
+                              : (isDark ? Colors.grey.shade500 : Colors.grey.shade500),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeCard extends StatelessWidget {
+  final String value;
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _ThemeCard({
+    required this.value,
+    required this.icon,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -146,41 +226,56 @@ class _StatCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: isAccent ? const Color(0xFF000072) : null,
+            border: Border.all(color: Colors.grey.shade300),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  size: 20,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Theme Mode',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Icon(
-                icon,
-                color: isAccent
-                    ? Colors.white
-                    : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                size: 24,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: isAccent ? Colors.white : null,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isAccent
-                      ? Colors.white70
-                      : (isDark ? Colors.grey[500] : Colors.grey[500]),
-                ),
+                Icons.chevron_right,
+                color: Colors.grey.shade400,
+                size: 20,
               ),
             ],
           ),

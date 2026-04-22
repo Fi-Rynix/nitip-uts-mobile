@@ -42,10 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    final credentials = {
-      'username': _usernameController.text,
-      'password': _passwordController.text,
-    };
+    final credentials = LoginCredentials(_usernameController.text, _passwordController.text);
 
     // Trigger login
     final loginResult = await ref.read(loginProvider(credentials).future);

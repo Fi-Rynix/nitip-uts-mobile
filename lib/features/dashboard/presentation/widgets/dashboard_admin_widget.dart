@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../ticket/presentation/providers/ticket_provider.dart';
-import '../../../../core/theme/theme_provider.dart';
+import '../providers/dashboard_provider.dart';
+import '../../data/models/dashboard_model.dart';
 
 class DashboardAdminWidget extends ConsumerWidget {
   const DashboardAdminWidget({Key? key}) : super(key: key);
@@ -10,7 +10,10 @@ class DashboardAdminWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
-    final allTicketsAsync = ref.watch(fetchAllTicketsProvider);
+    final dashboardStatsAsync = ref.watch(adminDashboardStatsProvider);
+
+    // Trigger fetch stats on widget build
+    ref.listen(adminDashboardStatsProvider, (previous, next) {});
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -66,7 +69,7 @@ class DashboardAdminWidget extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'System overview \u0026 analytics',
+            'System overview & analytics',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -75,16 +78,10 @@ class DashboardAdminWidget extends ConsumerWidget {
           const SizedBox(height: 32),
 
           // Stats section
-          allTicketsAsync.when(
+          dashboardStatsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Text('Error: $error'),
-            data: (tickets) {
-              final totalTickets = tickets.length;
-              final openTickets = tickets.where((t) => t.status == 'open').length;
-              final assignedTickets = tickets.where((t) => t.status == 'assigned').length;
-              final inProgressTickets = tickets.where((t) => t.status == 'in_progress').length;
-              final doneTickets = tickets.where((t) => t.status == 'done').length;
-
+            data: (DashboardStats stats) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,7 +113,7 @@ class DashboardAdminWidget extends ConsumerWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                totalTickets.toString(),
+                                stats.totalTickets.toString(),
                                 style: const TextStyle(
                                   fontSize: 42,
                                   fontWeight: FontWeight.w700,
@@ -159,28 +156,28 @@ class DashboardAdminWidget extends ConsumerWidget {
                   // Status breakdown - Vertical flex layout
                   _StatusCard(
                     label: 'Open',
-                    count: openTickets,
+                    count: stats.openTickets,
                     icon: Icons.circle_outlined,
                     color: const Color(0xFFDC2626),
                   ),
                   const SizedBox(height: 12),
                   _StatusCard(
                     label: 'Assigned',
-                    count: assignedTickets,
+                    count: stats.assignedTickets,
                     icon: Icons.person_outline,
                     color: const Color(0xFFF97316),
                   ),
                   const SizedBox(height: 12),
                   _StatusCard(
                     label: 'In Progress',
-                    count: inProgressTickets,
+                    count: stats.inProgressTickets,
                     icon: Icons.pending_outlined,
                     color: const Color(0xFF3B82F6),
                   ),
                   const SizedBox(height: 12),
                   _StatusCard(
                     label: 'Done',
-                    count: doneTickets,
+                    count: stats.doneTickets,
                     icon: Icons.check_circle_outline,
                     color: const Color(0xFF10B981),
                   ),

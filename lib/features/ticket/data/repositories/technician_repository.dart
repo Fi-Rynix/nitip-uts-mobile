@@ -1,11 +1,15 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/technician_model.dart';
+
+final technicianRepositoryProvider = Provider((ref) => TechnicianRepository());
 
 class TechnicianRepository {
   // Dummy technicians
   static final List<Technician> _technicians = [
-    Technician(id: 'tech_001', name: 'Budi Santoso', username: 'budi'),
-    Technician(id: 'tech_002', name: 'Siti Nurhaliza', username: 'siti'),
-    Technician(id: 'tech_003', name: 'Ahmad Wijaya', username: 'ahmad'),
+    Technician(id: 'tech_001', name: 'Alan Udin', username: 'udin'),
+    Technician(id: 'tech_002', name: 'Vikibara Can', username: 'viki'),
+    Technician(id: 'tech_003', name: 'Rizkimok', username: 'rizki'),
   ];
 
   /// Get all technicians

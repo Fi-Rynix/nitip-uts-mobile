@@ -1,48 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ticket/presentation/pages/ticket_detail_page.dart';
+import '../providers/notification_provider.dart';
 
-class NotificationPage extends StatelessWidget {
+class NotificationPage extends ConsumerWidget {
   const NotificationPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    // Dummy notifications
-    final notifications = [
-      {
-        'id': 'ticket_001',
-        'title': 'Your ticket has been assigned',
-        'description': 'Technician Budi Santoso has been assigned to your ticket',
-        'time': '2 hours ago',
-      },
-      {
-        'id': 'ticket_002',
-        'title': 'Ticket status updated',
-        'description': 'Your printer issue ticket is now In Progress',
-        'time': '4 hours ago',
-      },
-      {
-        'id': 'ticket_003',
-        'title': 'New ticket confirmation',
-        'description': 'Your network problem ticket has been received',
-        'time': '1 day ago',
-      },
-      {
-        'id': 'ticket_004',
-        'title': 'Ticket completed',
-        'description': 'Your monitor issue has been resolved',
-        'time': '2 days ago',
-      },
-      {
-        'id': 'ticket_005',
-        'title': 'Comment added',
-        'description': 'Technician Siti added a comment to your ticket',
-        'time': '3 days ago',
-      },
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notificationsAsync = ref.watch(allNotificationsProvider);
 
     return Scaffold(
-      body: notifications.isEmpty
-          ? Center(
+      body: notificationsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+        data: (notifications) {
+          if (notifications.isEmpty) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -54,57 +28,72 @@ class NotificationPage extends StatelessWidget {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              final notification = notifications[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: notification.isRead ? Colors.grey[200] : Colors.blue[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.notifications,
+                      color: notification.isRead ? Colors.grey : Colors.blue,
+                    ),
                   ),
-                  child: ListTile(
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(8),
+                  title: Text(
+                    notification.title,
+                    style: TextStyle(
+                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                      color: notification.isRead ? Colors.grey[600] : Colors.black,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(notification.description),
+                      const SizedBox(height: 4),
+                      Text(
+                        notification.time,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                       ),
-                      child: const Icon(Icons.notifications, color: Colors.blue),
-                    ),
-                    title: Text(
-                      notification['title']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(notification['description']!),
-                        const SizedBox(height: 4),
-                        Text(
-                          notification['time']!,
-                          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                    trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TicketDetailPage(ticketId: notification['id']!),
-                        ),
-                      );
-                    },
+                    ],
                   ),
-                );
-              },
-            ),
+                  trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
+                  onTap: () {
+                    // Mark as read
+                    if (!notification.isRead) {
+                      ref.read(markNotificationAsReadProvider(notification.id));
+                    }
+                    // Navigate to ticket detail
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TicketDetailPage(ticketId: notification.relatedTicketId),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
